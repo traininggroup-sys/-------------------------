@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>اختبار إلكتروني</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        direction: rtl;
+        font-weight: 900;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      #login-container {
+        max-width: 400px;
+        margin: 100px auto;
+        padding: 30px;
+        background-color: #ffffff;
+        border: 2px solid #007bff;
+        border-radius: 15px;
+        box-shadow: 0 5px 25px rgba(0, 123, 255, 0.2);
+        text-align: center;
+        transition: all 0.3s ease-in-out;
+      }
+
+      #login-container label {
+        display: block;
+        font-size: 18px;
+        color: #333;
+        margin-bottom: 8px;
+        text-align: right;
+      }
+
+      #login-container input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 20px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-sizing: border-box;
+      }
+
+      #login-container button {
+        width: 100%;
+        background-color: #007bff;
+        color: white;
+        padding: 12px 0;
+        font-size: 18px;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      #login-container button:hover {
+        background-color: #0056b3;
+      }
+
+      #result {
+        margin-top: 20px;
+        text-align: right;
+      }
+
+      #timer {
+        font-size: 20px;
+        color: red;
+        font-weight: bold;
+      }
+
+      h2 {
+        font-size: 22px;
+        font-weight: 900;
+        color: #000000;
+      }
+
+      label {
+        font-size: 18px;
+        font-weight: 900;
+        color: #333333;
+      }
+
+      #next-button {
+        position: absolute;
+        left: 20px;
+        bottom: 20px;
+        padding: 10px 20px;
+        font-weight: 900;
+      }
+
+      .correct-answer {
+        color: green;
+        font-weight: 900;
+      }
+
+      .wrong-answer {
+        color: red;
+        font-weight: 900;
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      ul li {
+        margin-bottom: 15px;
+        background-color: #f0f4f8;
+        padding: 10px;
+        border-radius: 6px;
+        font-weight: 900;
+        color: #000;
+        font-size: 18px;
+      }
+
+      #result h2,
+      #result h3,
+      #result p {
+        font-weight: 900;
+        color: #000;
+        font-size: 18px;
+        text-align: right;
+      }
+
+      #retry-button {
+        padding: 10px 20px;
+        font-weight: bold;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>التدريب علي اختبارات الجهاز المركزى</h2>
+
+    <div id="login-container">
+      <label for="password">🔒 أدخل كلمة المرور:</label>
+      <input id="password" type="password" placeholder="مثال: 12345678" />
+      <label for="duration">⏳ حدد مدة الاختبار (بالدقائق):</label>
+      <input id="duration" type="number" value="5" min="1" />
+      <button onclick="checkPassword()">🚀 دخول</button>
+    </div>
+
+    <div class="hidden" id="quiz">
+      <div id="timer">5:00</div>
+      <div id="question-info">السؤال 1 من 20</div>
+      <form id="quizForm">
+        <div id="question-container"></div>
+        <button id="next-button" onclick="nextQuestion(event)" type="button">
+          التالي
+        </button>
+      </form>
+    </div>
+
+    <div class="hidden" id="result"></div>
+
+    <script>
+      const questions = [
+        {
+          question: "للتراجع عن حذف رسالة في برنامج Outlook، نستخدم اختصار:",
+          options: ["CTRL Y", "CTRL V", "CTRL Z", "CTRL C"],
+          answer: "CTRL Z",
+        },
+        {
+          question: "لإنشاء رسالة جديدة في Outlook نستخدم اختصار:",
+          options: ["CTRL R", "CTRL F", "CTRL N", "CTRL U"],
+          answer: "CTRL N",
+        },
+        {
+          question: "للرد على رسالة في Outlook نستخدم اختصار:",
+          options: ["CTRL SHIFT R", "CTRL R", "CTRL ALT R", "CTRL P"],
+          answer: "CTRL R",
+        },
+        {
+          question: "لإعادة توجيه رسالة في Outlook نستخدم اختصار:",
+          options: ["CTRL SHIFT F", "CTRL T", "CTRL E", "CTRL F"],
+          answer: "CTRL F",
+        },
+        {
+          question: "لتحديد كل محتوى الرسالة في Outlook نستخدم اختصار:",
+          options: ["CTRL E", "CTRL L", "CTRL A", "CTRL K"],
+          answer: "CTRL A",
+        },
+        {
+          question: "لنسخ نص داخل رسالة في Outlook نستخدم اختصار:",
+          options: ["CTRL V", "CTRL C", "CTRL X", "CTRL A"],
+          answer: "CTRL C",
+        },
+        {
+          question: "لصق نص داخل رسالة في Outlook نستخدم اختصار:",
+          options: ["CTRL V", "CTRL C", "CTRL X", "CTRL Z"],
+          answer: "CTRL V",
+        },
+        {
+          question: "لقص نص داخل رسالة في Outlook نستخدم اختصار:",
+          options: ["CTRL C", "CTRL V", "CTRL A", "CTRL X"],
+          answer: "CTRL X",
+        },
+        {
+          question: "لإغلاق نافذة رسالة في Outlook نستخدم اختصار:",
+          options: ["CTRL W", "CTRL Q", "CTRL E", "CTRL N"],
+          answer: "CTRL W",
+        },
+        {
+          question: "لتعليم الرسالة كمقروءة في Outlook نستخدم اختصار:",
+          options: ["CTRL Q", "CTRL R", "CTRL U", "CTRL D"],
+          answer: "CTRL Q",
+        },
+        {
+          question: "لتعليم الرسالة كغير مقروءة في Outlook نستخدم اختصار:",
+          options: ["CTRL Q", "CTRL R", "CTRL P", "CTRL U"],
+          answer: "CTRL U",
+        },
+        {
+          question: "لإرسال رسالة في Outlook نستخدم اختصار:",
+          options: ["CTRL S", "CTRL ENTER", "CTRL P", "CTRL R"],
+          answer: "CTRL ENTER",
+        },
+        {
+          question: "أي مما يلي يُعد جهاز إدخال وإخراج معا؟",
+          options: ["الشاشة", "الذاكرة الرقمية", "الطابعة", "الفأرة"],
+          answer: "الذاكرة الرقمية",
+        },
+        {
+          question: "ما هو HTTP؟",
+          options: [
+            "Hyper Text Transfer Protocol",
+            "High Transfer Text Protocol",
+            "Hyper Transfer Text Page",
+            "Home Text Transfer Program",
+          ],
+          answer: "Hyper Text Transfer Protocol",
+        },
+        {
+          question: "الكاميرا تعتبر من:",
+          options: [
+            "وحدات الإخراج",
+            "وحدات المعالجة",
+            "وحدات الإدخال",
+            "وحدات التخزين",
+          ],
+          answer: "وحدات الإدخال",
+        },
+        {
+          question: "أي مما يلي يعتبر وحدة إدخال وإخراج معا",
+          options: [
+            "الفأرة",
+            "شاشة اللمس/ Touch Screen",
+            "الماسح الضوئي",
+            "سماعات الرأس",
+          ],
+          answer: "شاشة اللمس/ Touch Screen",
+        },
+        {
+          question: "أي جهاز من الأجهزة التالية يعمل كجهاز إدخال وإخراج معًا؟",
+          options: [
+            "الطابعة",
+            "لوحة المفاتيح",
+            "الماسح الضوئي",
+            "بطاقة الشبكة",
+          ],
+          answer: "بطاقة الشبكة",
+        },
+        {
+          question: "أي من الآتي ليس جهاز إدخال؟",
+          options: [
+            "لوحة المفاتيح",
+            "الطابعة",
+            "الكاميرا الرقمية",
+            "الماسح الضوئي",
+          ],
+          answer: "الطابعة",
+        },
+        {
+          question: "أيّ الوحدات التالية تُعتبر وحدة إدخال وإخراج؟",
+          options: ["القرص الصلب", "الميكروفون", "الفأرة", "الطابعة"],
+          answer: "القرص الصلب",
+        },
+        {
+          question:
+            "الكاميرا تُستخدم في الحاسوب لإدخال الصور والفيديوهات، تُصنف كـ؟",
+          options: ["وحدة إخراج", "وحدة معالجة", "وحدة إدخال", "وحدة تخزين"],
+          answer: "وحدة إدخال",
+        },
+        {
+          question:
+            "الماوس يُستخدم لتحريك المؤشر والتفاعل مع الواجهة، يُعد من؟",
+          options: ["وحدة إدخال", "وحدة إخراج", "وحدة معالجة", "وحدة تخزين"],
+          answer: "وحدة إدخال",
+        },
+        {
+          question: "الطابعة تُستخدم لطباعة المستندات من الحاسوب، تُصنف كـ؟",
+          options: ["وحدة معالجة", "وحدة إدخال", "وحدة إخراج", "وحدة تخزين"],
+          answer: "وحدة إخراج",
+        },
+        {
+          question: "سماعات الحاسوب تُستخدم لسماع الصوت، تُعد من؟",
+          options: ["وحدة إخراج", "وحدة معالجة", "وحدة إدخال", "وحدة تخزين"],
+          answer: "وحدة إخراج",
+        },
+        {
+          question: "لوحة المفاتيح تُستخدم لكتابة البيانات والأوامر، تُصنف كـ؟",
+          options: ["وحدة إدخال", "وحدة إخراج", "وحدة معالجة", "وحدة تخزين"],
+          answer: "وحدة إدخال",
+        },
+        {
+          question:
+            "الشاشة اللمسية تُستخدم للعرض والتفاعل اللمسي في نفس الوقت، تُصنف كـ؟",
+          options: [
+            "وحدة إدخال",
+            "وحدة إخراج",
+            "وحدة إدخال وإخراج",
+            "وحدة تخزين",
+          ],
+          answer: "وحدة إدخال وإخراج",
+        },
+        {
+          question:
+            "الأقراص الصلبة الخارجية تُستخدم لتخزين واسترجاع البيانات، تُعد من؟",
+          options: [
+            "وحدة إدخال",
+            "وحدة إخراج",
+            "وحدة معالجة",
+            "وحدة إدخال وإخراج",
+          ],
+          answer: "وحدة إدخال وإخراج",
+        },
+        {
+          question:
+            "فلاش USB يُستخدم لنقل وتخزين البيانات بين الأجهزة، يُصنف كـ؟",
+          options: [
+            "وحدة إدخال",
+            "وحدة إدخال وإخراج",
+            "وحدة إخراج",
+            "وحدة معالجة",
+          ],
+          answer: "وحدة إدخال وإخراج",
+        },
+        {
+          question:
+            "في شبكة LAN، ما الذي يمكن أن يكون مشتركاً أو متصلاً مع كل الأجهزة؟",
+          options: ["الطابعة", "الكمبيوتر المحمول", "الهاتف المحمول", "المودم"],
+          answer: "الطابعة",
+        },
+        {
+          question: "القرص المضغوط (CD) يُعتبر من وحدات الإدخال والإخراج.",
+          options: ["صح", "خطأ"],
+          answer: "خطأ",
+        },
+      ];
+      let currentQuestion = 0;
+      let score = 0;
+      let timer;
+      let timeLeft;
+      let userAnswers = [];
+
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+
+      function shuffleQuestions() {
+        shuffle(questions);
+        questions.forEach((q) => shuffle(q.options));
+      }
+
+      function checkPassword() {
+        const passwordInput = document.getElementById("password").value;
+        const durationInput =
+          parseInt(document.getElementById("duration").value) || 10;
+        timeLeft = durationInput * 60;
+
+        if (passwordInput === "412") {
+          shuffleQuestions();
+          document.getElementById("login-container").classList.add("hidden");
+          document.getElementById("quiz").classList.remove("hidden");
+          document.getElementById("result").classList.add("hidden");
+          currentQuestion = 0;
+          score = 0;
+          userAnswers = [];
+          loadQuestion();
+          startTimer();
+        } else {
+          alert(
+            "🚫 اكتب كلمة المرور بنفس الطريقة المكتوبة في جروب المشتركين، يعني بالإنجليزي مش بالعربي، وطبعًا من الشمال لليمين.\n\nولو إنت مش معانا في جروب المشتركين، يبقى مش من حقك تحل الاختبار ده. لو حابب تشترك، كلمنا وهنفعّل اشتراكك.",
+          );
+        }
+      }
+
+      function loadQuestion() {
+        const questionContainer = document.getElementById("question-container");
+        questionContainer.innerHTML = `
+      <h2>${questions[currentQuestion].question}</h2>
+      ${questions[currentQuestion].options
+        .map(
+          (option) => `
+        <label>
+          <input type="radio" name="option" value="${option}" />
+          ${
+            option === questions[currentQuestion].answer
+              ? `<span class="correct">${option}</span>`
+              : option
+          }
+        </label><br>
+      `,
+        )
+        .join("")}
+    `;
+        document.getElementById("question-info").textContent = `السؤال ${
+          currentQuestion + 1
+        } من ${questions.length}`;
+      }
+
+      function nextQuestion(event) {
+        event.preventDefault();
+        const selected = document.querySelector('input[name="option"]:checked');
+        if (!selected) return alert("اختر إجابة.");
+        userAnswers[currentQuestion] = selected.value;
+        if (selected.value === questions[currentQuestion].answer) score++;
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+          loadQuestion();
+        } else {
+          clearInterval(timer);
+          showResults();
+        }
+      }
+
+      function showResults(timeUp = false) {
+        document.getElementById("quiz").classList.add("hidden");
+        const resultDiv = document.getElementById("result");
+        resultDiv.classList.remove("hidden");
+
+        const percent = ((score / questions.length) * 100).toFixed(1);
+
+        let feedback = "";
+        if (percent == 100) {
+          feedback = "أنت بطل! برافو عليك 👏";
+        } else if (percent >= 80) {
+          feedback = "ممتاز! واضح إنك مذاكر كويس 💪";
+        } else if (percent >= 60) {
+          feedback = "كويس، بس محتاج تراجع شوية 🙂";
+        } else if (percent >= 40) {
+          feedback = "راجع الدروس تاني وحاول تركز أكتر 📚";
+        } else {
+          feedback = "ابدأ من الأول وراجع كويس، شد حيلك! 💡";
+        }
+
+        let warningMsg = "";
+        if (timeUp && currentQuestion < questions.length) {
+          warningMsg = `
+        <p style="color: red;">⏰ انتهى الوقت قبل إكمال جميع الأسئلة.</p>
+        <p>في المرة الجاية حاول تحل الأسئلة بشكل أسرع علشان تلحق تكمل 💡</p>
+      `;
+        }
+
+        let review = "<h3>مراجعة الإجابات:</h3><ul>";
+        questions.forEach((q, i) => {
+          const ua = userAnswers[i] || "لم يُجب";
+          const correct = q.answer;
+          const isCorrect = ua === correct;
+          review += `
+        <li>
+          <strong>السؤال ${i + 1}:</strong> ${q.question}<br>
+          إجابتك: <span class="${
+            isCorrect ? "correct-answer" : "wrong-answer"
+          }">${ua}</span><br>
+          الإجابة الصحيحة: <span class="correct-answer">${correct}</span><br>
+          <strong>التفسير:</strong> ${q.explanation || "لا يوجد تفسير."}
+        </li>
+      `;
+        });
+        review += "</ul>";
+
+        resultDiv.innerHTML = `
+      ${warningMsg}
+      <h2>نتيجة الاختبار</h2>
+      <p>${score} من ${questions.length} | النسبة: ${percent}%</p>
+      <p>${feedback}</p>
+      ${review}
+      <button id="retry-button" onclick="location.reload()">إعادة المحاولة</button>
+    `;
+      }
+
+      function startTimer() {
+        timer = setInterval(() => {
+          timeLeft--;
+          const minutes = Math.floor(timeLeft / 60);
+          const seconds = timeLeft % 60;
+          document.getElementById("timer").textContent = `${minutes}:${
+            seconds < 10 ? "0" : ""
+          }${seconds}`;
+          if (timeLeft <= 0) {
+            clearInterval(timer);
+            alert("انتهى الوقت!");
+            showResults(true);
+          }
+        }, 1000);
+      }
+
+      document
+        .getElementById("quizForm")
+        .addEventListener("keypress", function (event) {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            nextQuestion(event);
+          }
+        });
+    </script>
+  </body>
+</html>
